@@ -1,0 +1,9 @@
+[project]
+name = "llm-rag"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+    "ollama>=0.6.2",
+    "openai>=3.14.0",
+]
