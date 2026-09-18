@@ -1,4 +1,5 @@
 from sentence_transformers import SentenceTransformer
+from chromadb import Documents, EmbeddingFunction, Embeddings
 
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
@@ -16,6 +17,28 @@ def create_embedding(
 
     return embedding.tolist()
 
+class YugiohEmbeddingFunction:
+    def __init__(self):
+        self.model = load_embedding_model()
+
+    def __call__(self, input: Documents) -> Embeddings:
+        embeddings = self.model.encode(
+            input,
+            normalize_embeddings=True,
+        )
+        return embeddings.tolist()
+
+    @staticmethod
+    def name() -> str:
+        return "yugioh_embedding_function"
+
+    def get_config(self) -> dict:
+        return {}
+
+    @staticmethod
+    def build_from_config(config: dict) -> "YugiohEmbeddingFunction":
+        return YugiohEmbeddingFunction()
+
 if __name__ == "__main__":
     model = load_embedding_model()
 
@@ -25,6 +48,7 @@ if __name__ == "__main__":
     )
 
     embedding = create_embedding(model, text)
+
     print(f"Quantidade de dimensões: {len(embedding)}")
     print(f"Primeiros 5 valores: {embedding[:5]}")
 

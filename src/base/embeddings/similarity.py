@@ -20,28 +20,46 @@ def cosine_similarity(
 if __name__=="__main__":
     model = load_embedding_model()
 
-    texts = [
+    documents = [
         "A monster that can be Special Summoned from the Graveyard.",
         "A monster that can be Special Summoned from the hand.",
         "A Spell Card that destroys a monster.",
     ]
 
-    embeddings = [
-        create_embedding(model, text)
-        for text in texts
+    question = (
+        "Which monster can be Special Summoned"
+        "from the Graveyard?"
+    )
+
+    documents_embeddings = [
+        create_embedding(model, document)
+        for document in documents
     ]
 
-    print("=== SIMILARIDADES ===")
+    question_embedding = create_embedding(
+        model,
+        question,
+    )
 
-    for i in range(len(texts)):
-        for j in range(i + 1, len(texts)):
-            similarity = cosine_similarity(
-                embeddings[i],
-                embeddings[j],
-            )
+    results = []
 
-            print(
-                f"Texto {i + 1} * Texto {j + 1}: "
-                f"{similarity:.4f}"
-            )
+    for document, embedding in zip(
+        documents,
+        documents_embeddings,
+    ):
+        similarity = cosine_similarity(
+            question_embedding,
+            embedding,
+        )
 
+        results.append(
+            (similarity, document)
+        )
+
+    results.sort(reverse=True)
+
+    print("=== RESULTADOS ===")
+
+    for similarity, document in results:
+        print(f"\nSimilaridade: {similarity:.4f}")
+        print(document)
