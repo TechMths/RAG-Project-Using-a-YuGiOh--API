@@ -17,7 +17,7 @@ def create_embedding(
 
     return embedding.tolist()
 
-class YugiohEmbeddingFunction:
+class YugiohEmbeddingFunction(EmbeddingFunction[Documents]):
     def __init__(self):
         self.model = load_embedding_model()
 
