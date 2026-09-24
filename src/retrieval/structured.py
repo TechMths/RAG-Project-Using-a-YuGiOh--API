@@ -15,13 +15,14 @@ class StructuredRetriever:
         attribute = None,
         archetype = None,
         card_type = None,
+        atk_degree = None,
         atk_min = None,
         atk_max = None,
         def_min = None,
         def_max = None,
         level = None,
         rank = None,
-        top_k = 20,
+        top_k = None,
     ):
         results = []
 
@@ -41,6 +42,10 @@ class StructuredRetriever:
                     continue
 
             atk = metadata.get("atk")
+
+            if atk_degree is not None:
+                if atk is None:
+                    continue
             
             if atk_min is not None:
                 if atk is None or atk < atk_min:
@@ -56,6 +61,10 @@ class StructuredRetriever:
                 if defense is None or defense < def_min:
                     continue
 
+            if def_max is not None:
+                if defense is None or defense > def_max:
+                    continue
+
             if level is not None:
                 if metadata.get("level") != level:
                     continue
@@ -66,7 +75,7 @@ class StructuredRetriever:
 
             results.append(card)
 
-            if len(results) >= top_k:
+            if top_k is not None and len(results) >= top_k:
                 break
 
         return results
