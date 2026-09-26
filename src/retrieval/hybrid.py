@@ -3,6 +3,7 @@ import numpy as np
 from src.retrieval.lexical import LexicalRetriever
 from src.retrieval.retriever import YugiohRetriever
 from src.retrieval.structured import StructuredRetriever
+from src.retrieval.parser import QueryPlan, parse_query
 
 
 RRF_K = 60
@@ -19,6 +20,7 @@ class HybridRetriever:
         self.semantic = YugiohRetriever()
         self.lexical = LexicalRetriever()
         self.structured = StructuredRetriever()
+        self.parse = QueryPlan()
 
     @staticmethod
     def apply_degree(results, field, degree):
@@ -52,6 +54,7 @@ class HybridRetriever:
         atk_degree = None,
         atk_min = None,
         atk_max = None,
+        def_degree = None,
         def_min = None,
         def_max = None,
         level = None,
@@ -77,6 +80,7 @@ class HybridRetriever:
                 atk_degree,
                 atk_min,
                 atk_max,
+                def_degree,
                 def_min,
                 def_max,
                 level,
@@ -91,6 +95,7 @@ class HybridRetriever:
             atk_degree=atk_degree,
             atk_min=atk_min,
             atk_max=atk_max,
+            def_degree=def_degree,
             def_min=def_min,
             def_max=def_max,
             level=level,
@@ -99,13 +104,14 @@ class HybridRetriever:
         )
 
         if atk_degree:
-            sign = -1 if atk_degree in ("high", "very_high") else 1
-            ranked = sorted(
-                candidates.values(),
-                key=lambda c: (sign * (c["metadata"].get("atk") or 0), -c["score"]),
-            )
-        else:
-            ranked = sorted(candidates.values(), key=lambda c: c["score"], reverse=True)
+            structured_results = self.apply_degree(structured_results, "atk", atk_degree)
+
+        if def_degree:
+            structured_results = self.apply_degree(structured_results, "def", def_degree)
+
+        use_text = bool(query.strip())
+        semantic_results = self.semantic.search(query, top_k=candidate_k) if use_text else []
+        lexical_results = self.lexical.search(query, top_k=candidate_k) if use_text else []
 
 
         structured_ids = {
@@ -183,29 +189,29 @@ class HybridRetriever:
             candidates[card_id]["structured_rank"] = rank
             candidates[card_id]["score"] += 1 / (RRF_K + rank)
 
-        ranked = sorted(
-            candidates.values(),
-            key=lambda item: item["score"],
-            reverse=True,
-        )
+        degree_field = "atk" if atk_degree else "def" if def_degree else None
+        degree = atk_degree or def_degree
+
+        if degree_field:
+            sign = -1 if degree in ("high", "very_high") else 1
+            ranked = sorted(
+                candidates.values(),
+                key=lambda c: (sign * (c["metadata"].get(degree_field) or 0), -c["score"]),
+            )
+        else:
+            ranked = sorted(candidates.values(), key=lambda c: c["score"], reverse=True)
 
         return ranked[:top_k]
 
 if __name__=="__main__":
     retriever = HybridRetriever()
 
-    query = "High ATK DARK Monsters"
+    query = parse_query("high atk Dark magicians")
 
-    print("\n" + "=" * 70)
-    print(f"CONSULTA: {query}")
-    print("=" * 70)
+    print(query)
+    print(query.to_kwargs())
 
-    results = retriever.search(
-        "monsters",
-        top_k=10,
-        attribute="WATER",
-        atk_degree="high"
-    )
+    results = retriever.search(query.semantic_text, top_k=10, **query.to_kwargs())
 
     for index, result in enumerate(
         results,

@@ -4,10 +4,23 @@ import re
 ATTRIBUTES = {"dark", "light", "water", "fire", "earth", "wind", "divine"}
 
 FIELDS = [
-    ("gte", r"at least|no less than|minimum of|minimum|or more|or higher|>=|\+")
-    ("lte", r"at most|no more than|miximum of|maximum|or less|or lower|up to|<=")
-    ("gt", r"more than|greater than|higher than|over|above|>")
-    ("gte", r"less than|lower than|fewer than|under|below|<")
+    ("atk", r"atk|attack|ataque"),
+    ("def", r"def|defense|defence|defesa"),
+    ("level", r"level|lvl|nivel"),
+]
+
+COMPARATORS = [
+    ("gte", r"at least|no less than|minimum of|minimum|or more|or higher|>=|\+"),
+    ("lte", r"at most|no more than|miximum of|maximum|or less|or lower|up to|<="),
+    ("gt", r"more than|greater than|higher than|over|above|>"),
+    ("lt", r"less than|lower than|fewer than|under|below|<"),
+]
+
+DEGREES = [
+    ("very_high", r"very_high|extremely high|strongest|highest"),
+    ("very_low", r"very low|extremely low|weakest|lowest"),
+    ("high", r"high|strong|powerful|mighty"),
+    ("low", r"low|weak|feeble"),
 ]
 
 NOISE = {"monster", "monsters", "card", "cards", "that", "have", "has", "with",
@@ -56,4 +69,63 @@ def _clauses(text):
     bounds, start = [], 0
     for m in re.finditer(r"\band\b|,|;|\bbut\b", text):
         bounds.append((start, m.start()))
-        
+        start = m.end()
+    bounds.append((start, len(text)))
+    return bounds
+
+def _apply_bound(plan, field, op, n):
+    if field == "level":
+        plan.level = n
+        return
+    lo, hi = {
+        "gte": (n, None), "gt": (n + 1, None),
+        "lte": (None, n), "lt": (None, n - 1),
+        "eq": (n, n),
+    }[op]
+    if lo is not None:
+        setattr(plan, f"{field}_min", lo)
+    if hi is not None:
+        setattr(plan, f"{field}_max", hi)
+
+def _has_bound(plan, field):
+    return getattr(plan, f"{field}_min") is not None or getattr(plan, f"{field}_max")
+
+def parse_query(query: str) -> QueryPlan:
+    text = query.lower()
+    plan, consumed = QueryPlan(), []
+
+    fields = _find(FIELDS, text)
+    comps = _find(COMPARATORS, text)
+    degrees = _find(DEGREES, text)
+    clauses = _clauses(text)
+
+    for m in re.finditer(NUMBER, text):
+        n = int(re.sub(r"[.,]","", m.group()))
+        span = m.span()
+        scope = next(c for c in clauses if c[0] <= span[0] <= c[1])
+        field = _nearest(span, fields, scope)
+        if not field:
+            continue
+        comp = _nearest(span, comps, scope)
+        _apply_bound(plan, field[2], comp[2] if comp else "eq", n)
+        consumed += [span, field[:2]] + ([comp[:2]] if comp else [])
+
+    for s, e, degree in degrees:
+        field = _nearest((s, e), fields, max_dist=12)
+        name = field[2] if field else "atk"
+        if name not in ("atk", "def") or _has_bound(plan, name):
+            continue
+        setattr(plan, f"{name}_degree", degree)
+        consumed += [(s, e)] + ([field[:2]] if field else [])
+
+    for m in re.finditer(rf"(?<![a-z])({'|'.join(ATTRIBUTES)})(?![a-z])", text):
+        plan.attribute = plan.attribute or m.group(1).upper()
+        consumed.append(m.span())
+
+    chars = list(text)
+    for s, e in consumed:
+        chars[s:e] = " " * (e - s)
+    words = [w for w in re.findall(r"[a-z0-9'\-]+", "".join(chars)) if w not in NOISE]
+    plan.semantic_text = " ".join(words)
+    return plan
+

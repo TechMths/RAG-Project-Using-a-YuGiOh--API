@@ -18,6 +18,7 @@ class StructuredRetriever:
         atk_degree = None,
         atk_min = None,
         atk_max = None,
+        def_degree = None,
         def_min = None,
         def_max = None,
         level = None,
@@ -56,6 +57,10 @@ class StructuredRetriever:
                     continue
 
             defense = metadata.get("def")
+
+            if def_degree is not None:
+                if defense is None:
+                    continue
 
             if def_min is not None:
                 if defense is None or defense < def_min:
