@@ -11,4 +11,11 @@ dependencies = [
     "pdfplumber>=0.11.10",
     "requests>=2.34.2",
     "sentence-transformers>=6.0.1",
+    "streamlit>=1.64.0",
 ]
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

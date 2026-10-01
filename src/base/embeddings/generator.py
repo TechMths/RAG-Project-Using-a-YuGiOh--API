@@ -1,6 +1,6 @@
 import json
 
-from src.config import (
+from config import (
     PROCESSED_CARDS_FILE,
     PROCESSED_DATA_DIR,
 )

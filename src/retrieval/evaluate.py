@@ -1,4 +1,4 @@
-from src.retrieval.retriever import YugiohRetriever
+from retrieval.retriever import YugiohRetriever
 
 QUERIES = [
     "cartas que podem ser invocadas especialmente do cemitério",

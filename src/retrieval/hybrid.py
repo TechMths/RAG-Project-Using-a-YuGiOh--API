@@ -1,9 +1,9 @@
 import numpy as np
 
-from src.retrieval.lexical import LexicalRetriever
-from src.retrieval.retriever import YugiohRetriever
-from src.retrieval.structured import StructuredRetriever
-from src.retrieval.parser import QueryPlan, parse_query
+from retrieval.lexical import LexicalRetriever
+from retrieval.retriever import YugiohRetriever
+from retrieval.structured import StructuredRetriever
+from retrieval.parser import QueryPlan, parse_query
 
 
 RRF_K = 60
@@ -58,6 +58,8 @@ class HybridRetriever:
         def_min = None,
         def_max = None,
         level = None,
+        level_min = None,
+        level_max = None,
         rank = None,
     ) -> list[dict]:
         
@@ -84,11 +86,13 @@ class HybridRetriever:
                 def_min,
                 def_max,
                 level,
+                level_min,
+                level_max,
                 rank,
             ]
         )
 
-        structured_results = self.structured.search(
+        structured_results = (self.structured.search(
             attribute=attribute,
             archetype=archetype,
             card_type=card_type,
@@ -99,9 +103,11 @@ class HybridRetriever:
             def_min=def_min,
             def_max=def_max,
             level=level,
+            level_min=level_min,
+            level_max=level_max,
             rank=rank,
             top_k=None,
-        )
+        ) if has_structured_filters else [])
 
         if atk_degree:
             structured_results = self.apply_degree(structured_results, "atk", atk_degree)
@@ -191,12 +197,19 @@ class HybridRetriever:
 
         degree_field = "atk" if atk_degree else "def" if def_degree else None
         degree = atk_degree or def_degree
+        has_text = bool(query.strip())
 
-        if degree_field:
+        if degree_field and not has_text:
             sign = -1 if degree in ("high", "very_high") else 1
             ranked = sorted(
                 candidates.values(),
                 key=lambda c: (sign * (c["metadata"].get(degree_field) or 0), -c["score"]),
+            )
+        elif degree_field and has_text:
+            sign = -1 if degree in ("high", "very_high") else 1
+            ranked = sorted(
+                candidates.values(),
+                key=lambda c: (-c["score"], sign * (c["metadata"].get(degree_field) or 0)),
             )
         else:
             ranked = sorted(candidates.values(), key=lambda c: c["score"], reverse=True)
@@ -206,33 +219,45 @@ class HybridRetriever:
 if __name__=="__main__":
     retriever = HybridRetriever()
 
-    query = parse_query("high atk Dark magicians")
+    inputs = ["Dark Magician",
+              "cards similar to Dark Magician",
+              "Alsei, the Sylvan High Protector",
+              "High ATK Dark Monsters",
+              ]
 
-    print(query)
-    print(query.to_kwargs())
+    for i in inputs:
+        print("="*20)
+        print(i)
+        print("="*20)
 
-    results = retriever.search(query.semantic_text, top_k=10, **query.to_kwargs())
+        query = parse_query(i)
 
-    for index, result in enumerate(
-        results,
-        start=1,
-    ): 
-        metadata = result["metadata"]
-        
-        print(
-            f"{index}. "
-            f"{metadata['name']}"
-            f"| ATK: "
-            f"{metadata.get('atk')}"
-            f"| Attribute: "
-            f"{metadata.get('attribute')}"
-            f"| semantic: "
-            f"{result['semantic_rank']}"
-            f"| lexical: "
-            f"{result['lexical_rank']}"
-            f"| Structured rank: "
-            f"{result['structured_rank']}"
-            f"| RRF score: "
-            f"{result['score']:.4f}"
-        )
+        results = retriever.search(query.semantic_text, top_k=10, **query.to_kwargs())
+
+        for index, result in enumerate(
+            results,
+            start=1,
+        ): 
+            metadata = result["metadata"]
+            
+            print(
+                f"{index}. "
+                f"{metadata['name']}"
+                f"| ATK: "
+                f"{metadata.get('atk')}"
+                f"| DEF: "
+                f"{metadata.get('def')}"
+                f"| Level: "
+                f"{metadata.get('level')}"
+                f"| Attribute: "
+                f"{metadata.get('attribute')}"
+                f"| semantic: "
+                f"{result['semantic_rank']}"
+                f"| lexical: "
+                f"{result['lexical_rank']}"
+                f"| Structured rank: "
+                f"{result['structured_rank']}"
+                f"| RRF score: "
+                f"{result['score']:.4f}"
+            )
 

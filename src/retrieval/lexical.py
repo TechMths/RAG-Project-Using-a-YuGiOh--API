@@ -3,7 +3,7 @@ import re
 import math
 from collections import Counter
 
-from src.config import PROCESSED_CARDS_FILE
+from config import PROCESSED_CARDS_FILE
 
 def load_cards() -> list[dict]:
     with PROCESSED_CARDS_FILE.open(

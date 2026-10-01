@@ -1,6 +1,6 @@
 import json
 
-from src.config import PROCESSED_CARDS_FILE
+from config import PROCESSED_CARDS_FILE
 
 def load_card():
     with PROCESSED_CARDS_FILE.open("r", encoding="utf-8") as file:
@@ -22,6 +22,8 @@ class StructuredRetriever:
         def_min = None,
         def_max = None,
         level = None,
+        level_min = None,
+        level_max = None,
         rank = None,
         top_k = None,
     ):
@@ -31,7 +33,8 @@ class StructuredRetriever:
             metadata = card["metadata"]
 
             if attribute is not None:
-                if metadata.get("attribute") != attribute:
+                attrs = attribute if isinstance(attribute, list) else [attribute]
+                if metadata.get("attribute") not in attrs:
                     continue
 
             if archetype is not None:
@@ -70,8 +73,18 @@ class StructuredRetriever:
                 if defense is None or defense > def_max:
                     continue
 
+            lvl = metadata.get("level")
+
             if level is not None:
                 if metadata.get("level") != level:
+                    continue
+
+            if level_min is not None:
+                if lvl is None or lvl < level_min:
+                    continue
+
+            if level_max is not None:
+                if lvl is None or lvl > level_max:
                     continue
 
             if rank is not None:

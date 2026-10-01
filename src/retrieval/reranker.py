@@ -16,6 +16,9 @@ class YugiohReranker:
         candidates: list[dict],
         top_k: int = 5,
     ) -> list[dict]:
+        if not candidates:
+            return []
+        
         pairs = [
             (
                 query,
@@ -62,6 +65,7 @@ if __name__=="__main__":
         "DARK monsters with high ATK",
         "cards that negate monsters effects",
         "dark magicians",
+        "DARK monsters that can tribute other monsters to be invocate",
     ]
 
     for query in queries:

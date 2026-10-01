@@ -1,4 +1,4 @@
-from data.vectorstore.store import (
+from base.vectorstore.store import (
     create_client,
     get_collection,
 )
