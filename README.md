@@ -176,4 +176,4 @@ This project was developed to explore and apply concepts related to:
 
 ## License
 
-This project is intended for educational and portfolio purposes.
+This project is intended for educational and portfolio purposes. All of the data was requested by the API Yu-Gi-Oh! API by YGOPRODeck. All materials displayed in this project belong to KONAMI. All intellectual property rights are reserved to the respective brand.
