@@ -3,6 +3,8 @@
 
 An AI-powered Retrieval-Augmented Generation (RAG) system designed to retrieve and provide information about Yu-Gi-Oh! cards using natural language queries.
 
+<img width="800" height="450" alt="2026-10-0518-07-09-ezgif com-speed" src="https://github.com/user-attachments/assets/e253fe26-f4eb-49e8-88dc-b5e91c846642" />
+
 The project integrates the Yu-Gi-Oh! public API with a local data storage system, semantic search, and a Large Language Model (LLM) to deliver relevant card information through an interactive interface.
 
 ## Features
