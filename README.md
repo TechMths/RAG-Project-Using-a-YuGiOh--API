@@ -21,7 +21,6 @@ The project integrates the Yu-Gi-Oh! public API with a local data storage system
 | Technology | Purpose |
 |---|---|
 | Python | Main programming language |
-| FastAPI | Backend API |
 | Streamlit | Interactive user interface |
 | Sentence Transformers | Text embedding generation |
 | ChromaDB | Vector database |
@@ -118,43 +117,6 @@ Semantic Retriever   Lexical Retriever
 - Ollama
 - Llama 3.2
 - Required Python dependencies
-
-## Installation
-
-Clone the repository:
-
-```bash
-git clone https://github.com/TechMths/RAG-Project-Using-a-college-project.git
-cd RAG-Project-Using-a-college-project
-```
-
-Install the dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-Download the Llama 3.2 model:
-
-```bash
-ollama pull llama3.2
-```
-
-## Running the Project
-
-Start the backend:
-
-```bash
-fastapi dev app/app.py
-```
-
-Start the frontend (if configured separately):
-
-```bash
-streamlit run app/streamlit_app.py
-```
-
-> Adjust the commands above according to the actual entry points and configuration of your project.
 
 ## Project Goals
 
