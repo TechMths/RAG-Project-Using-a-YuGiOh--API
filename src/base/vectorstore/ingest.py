@@ -1,7 +1,7 @@
 import json
 
-from src.config import PROCESSED_CARDS_FILE
-from src.base.embeddings.generator import EMBEDDINGS_FILE
+from config import PROCESSED_CARDS_FILE
+from base.embeddings.generator import EMBEDDINGS_FILE
 from llm_rag.src.base.vectorstore.store import (
     create_client,
     get_collection,

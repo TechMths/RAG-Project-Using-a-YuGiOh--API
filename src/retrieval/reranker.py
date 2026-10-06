@@ -54,7 +54,7 @@ class YugiohReranker:
 
 
 if __name__=="__main__":
-    from src.retrieval.hybrid import HybridRetriever
+    from retrieval.hybrid import HybridRetriever
 
     hybrid = HybridRetriever()
     reranker = YugiohReranker()
