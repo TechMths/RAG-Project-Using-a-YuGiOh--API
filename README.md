@@ -123,7 +123,7 @@ Semantic Retriever   Lexical Retriever
 Clone the repository:
 
 ```bash
-git clone https://github.com/TechMths/RAG-Project-Using-a-college-project.git
+git clone https://github.com/TechMths/RAG-Project-Using-a-YuGiOh--API.git
 cd RAG-Project-Using-a-college-project
 ```
 
