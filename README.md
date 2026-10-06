@@ -118,6 +118,40 @@ Semantic Retriever   Lexical Retriever
 - Llama 3.2
 - Required Python dependencies
 
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/TechMths/RAG-Project-Using-a-college-project.git
+cd RAG-Project-Using-a-college-project
+```
+
+Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+uv run python -m src.base.ingestion.downloader
+uv run python -m src.base.ingestion.images (this is going to take a time to finish)
+uv run python -m src.base.ingestion.processor
+uv run python -m src.base.embbedings.generator
+uv run python -m src.base.vectorstore.ingest
+```
+
+Download the Llama 3.2 model:
+
+```bash
+ollama pull llama3.2
+```
+
+## Running the Project
+
+Start the backend:
+
+```bash
+uv run streamlit run app/app.py
+```
+
 ## Project Goals
 
 This project was developed to explore and apply concepts related to:
